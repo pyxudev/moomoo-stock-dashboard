@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+aiosqlite
+moomoo-api
+websockets
+python-dotenv
+pydantic
+pydantic-settings
+httpx

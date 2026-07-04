@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ja">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>株式分析ダッシュボード</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
+        .gain { color: #10b981; }
+        .loss { color: #ef4444; }
+    </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
+ </head>
+ <body data-template-id="__page-root" class="min-h-screen">
+  <div class="flex w-full" style="min-height: calc(100 * min(var(--vh, 1vh), 1vh))"><!-- Sidebar -->
+   <aside class="w-64 border-r border-gray-700 flex flex-col shrink-0">
+    <div class="p-4 border-b border-gray-700">
+     <h1 data-template-id="app-title" class="canva-text font-bold text-lg"></h1>
+     <p id="datetime-display" class="text-xs text-gray-400 mt-1"></p>
+    </div>
+    <div class="p-4">
+     <h2 data-template-id="watchlist-title" class="canva-text font-semibold text-sm mb-3"></h2>
+     <div class="flex gap-2 mb-3"><input id="stock-input" type="text" data-template-id="stock-input" class="canva-input flex-1 bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-white"> <button onclick="addStock()" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded px-2 py-1 text-sm"><i data-lucide="plus" style="width:14px;height:14px"></i></button>
+     </div>
+     <ul id="watchlist" class="space-y-1 text-sm"></ul>
+    </div>
+   </aside><!-- Main -->
+   <main class="flex-1 flex flex-col overflow-hidden">
+    <nav class="flex border-b border-gray-700 px-6 pt-3 gap-6 text-sm"><button class="tab-btn tab-active pb-2" data-tab="chart" data-template-id="tab-chart" onclick="switchTab('chart')"></button> <button class="tab-btn pb-2" data-tab="portfolio" data-template-id="tab-portfolio" onclick="switchTab('portfolio')"></button> <button class="tab-btn pb-2" data-tab="simulation" data-template-id="tab-sim" onclick="switchTab('simulation')"></button>
+    </nav><!-- Chart Tab -->
+    <section id="tab-chart" class="tab-panel flex-1 p-6 overflow-auto">
+     <div class="grid grid-cols-2 gap-4">
+      <div class="bg-gray-800 rounded-lg p-4 h-56 flex flex-col"><span class="text-xs text-gray-400 mb-2">7203 - トヨタ自動車</span>
+       <div class="flex-1 flex items-end gap-[2px]" id="chart-1"></div>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-4 h-56 flex flex-col"><span class="text-xs text-gray-400 mb-2">6758 - ソニーG</span>
+       <div class="flex-1 flex items-end gap-[2px]" id="chart-2"></div>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-4 h-56 flex flex-col"><span class="text-xs text-gray-400 mb-2">9984 - ソフトバンクG</span>
+       <div class="flex-1 flex items-end gap-[2px]" id="chart-3"></div>
+      </div>
+      <div class="bg-gray-800 rounded-lg p-4 h-56 flex flex-col"><span class="text-xs text-gray-400 mb-2">6861 - キーエンス</span>
+       <div class="flex-1 flex items-end gap-[2px]" id="chart-4"></div>
+      </div>
+     </div>
+    </section><!-- Portfolio Tab -->
+    <section id="tab-portfolio" class="tab-panel flex-1 p-6 overflow-auto hidden">
+     <div class="grid grid-cols-4 gap-4 mb-6">
+      <div data-template-id="summary-card-1" class="canva-card bg-gray-800 rounded-lg p-4">
+       <p data-template-id="summary-label-1" class="canva-text text-xs text-gray-400"></p>
+       <p class="text-xl font-bold text-white mt-1">¥12,450,000</p>
+      </div>
+      <div data-template-id="summary-card-2" class="canva-card bg-gray-800 rounded-lg p-4">
+       <p data-template-id="summary-label-2" class="canva-text text-xs text-gray-400"></p>
+       <p class="text-xl font-bold gain mt-1">+¥2,450,000</p>
+      </div>
+      <div data-template-id="summary-card-3" class="canva-card bg-gray-800 rounded-lg p-4">
+       <p data-template-id="summary-label-3" class="canva-text text-xs text-gray-400"></p>
+       <p class="text-xl font-bold gain mt-1">+24.5%</p>
+      </div>
+      <div data-template-id="summary-card-4" class="canva-card bg-gray-800 rounded-lg p-4">
+       <p data-template-id="summary-label-4" class="canva-text text-xs text-gray-400"></p>
+       <p class="text-xl font-bold text-white mt-1">5銘柄</p>
+      </div>
+     </div>
+     <div class="bg-gray-800 rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+       <thead class="bg-gray-750 text-gray-400 text-xs">
+        <tr class="border-b border-gray-700">
+         <th class="text-left p-3">銘柄</th>
+         <th class="text-right p-3">取得単価</th>
+         <th class="text-right p-3">現在値</th>
+         <th class="text-right p-3">株数</th>
+         <th class="text-right p-3">評価損益</th>
+         <th class="text-right p-3">損益率</th>
+        </tr>
+       </thead>
+       <tbody id="portfolio-table" class="text-white"></tbody>
+      </table>
+     </div>
+    </section><!-- Simulation Tab -->
+    <section id="tab-simulation" class="tab-panel flex-1 p-6 overflow-auto hidden">
+     <div class="flex items-center justify-between mb-6">
+      <div>
+       <p data-template-id="sim-fund-label" class="canva-text text-xs text-gray-400"></p>
+       <p id="sim-balance" class="text-2xl font-bold text-white">¥10,000,000</p>
+      </div><button data-template-id="sim-reset-btn" class="canva-button bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded" onclick="resetSimulation()"></button>
+     </div>
+     <div class="bg-gray-800 rounded-lg p-5 max-w-md">
+      <h3 data-template-id="sim-order-title" class="canva-text font-semibold mb-4"></h3>
+      <form onsubmit="executeTrade(event)" class="space-y-3">
+       <div class="flex gap-3"><label class="flex items-center gap-1 text-sm text-white"><input type="radio" name="side" value="buy" checked class="accent-emerald-500"> 買い</label> <label class="flex items-center gap-1 text-sm text-white"><input type="radio" name="side" value="sell" class="accent-red-500"> 売り</label>
+       </div><input id="sim-symbol" type="text" placeholder="銘柄コード" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm text-white"> <input id="sim-price" type="number" placeholder="価格" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm text-white"> <input id="sim-qty" type="number" placeholder="株数" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm text-white"> <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded py-2 text-sm font-semibold">注文実行</button>
+      </form>
+     </div>
+     <div class="mt-6">
+      <h3 class="text-sm text-gray-400 mb-2">取引履歴</h3>
+      <ul id="trade-history" class="space-y-1 text-sm text-white"></ul>
+     </div>
+    </section>
+   </main>
+  </div>
+  <script src="/_sdk/editing_sdk.js"></script>
+  <script>
+        // Sample data
+        const stocks = [
+            { code: '7203', name: 'トヨタ自動車', price: 2850, cost: 2400, qty: 200 },
+            { code: '6758', name: 'ソニーG', price: 13200, cost: 11500, qty: 100 },
+            { code: '9984', name: 'ソフトバンクG', price: 8900, cost: 7200, qty: 300 },
+            { code: '6861', name: 'キーエンス', price: 62000, cost: 58000, qty: 50 },
+            { code: '8035', name: '東京エレクトロン', price: 23500, cost: 21000, qty: 100 }
+        ];
+
+        let watchlist = stocks.map(s => ({ code: s.code, name: s.name }));
+        let simBalance = 10000000;
+        let trades = [];
+
+        function renderWatchlist() {
+            const ul = document.getElementById('watchlist');
+            ul.innerHTML = watchlist.map(s => `
+                <li class="flex justify-between items-center px-2 py-1.5 rounded hover:bg-gray-700 text-gray-200 cursor-pointer">
+                    <span>${s.code} ${s.name}</span>
+                    <button onclick="removeStock('${s.code}')" class="text-gray-500 hover:text-red-400"><i data-lucide="x" style="width:12px;height:12px"></i></button>
+                </li>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function addStock() {
+            const input = document.getElementById('stock-input');
+            const val = input.value.trim();
+            if (val && !watchlist.find(s => s.code === val)) {
+                watchlist.push({ code: val, name: '銘柄' + val });
+                renderWatchlist();
+            }
+            input.value = '';
+        }
+
+        function removeStock(code) {
+            watchlist = watchlist.filter(s => s.code !== code);
+            renderWatchlist();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('tab-active');
+        }
+
+        function renderCharts() {
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('chart-' + i);
+                const bars = 30;
+                let html = '';
+                for (let j = 0; j < bars; j++) {
+                    const h = 20 + Math.random() * 70;
+                    const color = Math.random() > 0.4 ? '#10b981' : '#ef4444';
+                    html += `<div style="flex:1;height:${h}%;background:${color};border-radius:1px;"></div>`;
+                }
+                el.innerHTML = html;
+            }
+        }
+
+        function renderPortfolio() {
+            const tbody = document.getElementById('portfolio-table');
+            tbody.innerHTML = stocks.map(s => {
+                const pnl = (s.price - s.cost) * s.qty;
+                const pnlPct = ((s.price - s.cost) / s.cost * 100).toFixed(1);
+                const cls = pnl >= 0 ? 'gain' : 'loss';
+                return `<tr class="border-b border-gray-700">
+                    <td class="p-3">${s.code} ${s.name}</td>
+                    <td class="text-right p-3">¥${s.cost.toLocaleString()}</td>
+                    <td class="text-right p-3">¥${s.price.toLocaleString()}</td>
+                    <td class="text-right p-3">${s.qty}</td>
+                    <td class="text-right p-3 ${cls}">${pnl >= 0 ? '+' : ''}¥${pnl.toLocaleString()}</td>
+                    <td class="text-right p-3 ${cls}">${pnl >= 0 ? '+' : ''}${pnlPct}%</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function executeTrade(e) {
+            e.preventDefault();
+            const side = document.querySelector('[name="side"]:checked').value;
+            const symbol = document.getElementById('sim-symbol').value;
+            const price = parseInt(document.getElementById('sim-price').value) || 0;
+            const qty = parseInt(document.getElementById('sim-qty').value) || 0;
+            if (!symbol || !price || !qty) return;
+            const total = price * qty;
+            if (side === 'buy') simBalance -= total; else simBalance += total;
+            trades.unshift({ side, symbol, price, qty, total });
+            document.getElementById('sim-balance').textContent = '¥' + simBalance.toLocaleString();
+            renderTrades();
+            e.target.reset();
+        }
+
+        function resetSimulation() {
+            simBalance = 10000000;
+            trades = [];
+            document.getElementById('sim-balance').textContent = '¥10,000,000';
+            renderTrades();
+        }
+
+        function renderTrades() {
+            document.getElementById('trade-history').innerHTML = trades.map(t =>
+                `<li class="flex justify-between bg-gray-800 rounded px-3 py-2">
+                    <span class="${t.side === 'buy' ? 'gain' : 'loss'}">${t.side === 'buy' ? '買' : '売'} ${t.symbol}</span>
+                    <span>¥${t.price.toLocaleString()} × ${t.qty} = ¥${t.total.toLocaleString()}</span>
+                </li>`
+            ).join('');
+        }
+
+        // Init
+        document.getElementById('datetime-display').textContent = new Date().toLocaleString('ja-JP');
+        renderWatchlist();
+        renderCharts();
+        renderPortfolio();
+        lucide.createIcons();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1346928c27c2da1',t:'MTc4MjczMDY1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/data
+      - ./backend:/app
+    environment:
+      - MOOMOO_HOST=${MOOMOO_HOST:-host.docker.internal}
+      - MOOMOO_PORT=${MOOMOO_PORT:-11111}
+      - DB_PATH=${DB_PATH:-/data/db.sqlite3}
+      - TZ=${TZ:-Asia/Tokyo}
+      - WS_REFRESH_INTERVAL=${WS_REFRESH_INTERVAL:-1000}
+      - DEFAULT_MARKET=${DEFAULT_MARKET:-JP}
+      - INITIAL_SIMULATION_MONEY=${INITIAL_SIMULATION_MONEY:-10000000}
+      - MAX_CHART_WINDOWS=${MAX_CHART_WINDOWS:-8}
+      - MAX_HISTORY_YEARS=${MAX_HISTORY_YEARS:-3}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:
