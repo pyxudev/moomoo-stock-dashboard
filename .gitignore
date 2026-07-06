@@ -1,2 +1,5 @@
-stock-dashboard/backend/__pyache__
-stock-dashboard/frontend/node_modules
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+*.log
