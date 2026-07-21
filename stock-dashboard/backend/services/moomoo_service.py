@@ -30,7 +30,8 @@ def get_snapshot(codes: list[str]) -> list[dict]:
     try:
         ret, data = ctx.get_market_snapshot(symbols)
         if ret != ft.RET_OK:
-            return []
+            print(f"[moomoo] get_market_snapshot failed for {symbols}: {data}")
+            raise RuntimeError(f"get_market_snapshot failed: {data}")
         results = []
         for _, row in data.iterrows():
             results.append(
@@ -82,7 +83,8 @@ def get_kline(
             max_count=1000,
         )
         if ret != ft.RET_OK:
-            return []
+            print(f"[moomoo] request_history_kline failed for {symbol}: {data}")
+            raise RuntimeError(f"request_history_kline failed: {data}")
         candles = []
         for _, row in data.iterrows():
             candles.append(
